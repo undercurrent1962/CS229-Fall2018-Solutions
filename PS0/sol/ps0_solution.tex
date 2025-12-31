@@ -1,0 +1,195 @@
+\documentclass[11pt]{article}
+
+\usepackage{amsmath, amssymb, amsthm}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+
+% 제목 설정
+\title{CS229 Problem Set \#0 Solution}
+\author{Jaeyun Kim}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section*{1. Gradients and Hessians}
+
+\subsection*{(a)}
+\[
+\nabla f(x) = \nabla \left( \frac{1}{2}x^\top A x + b^\top x\right) = \nabla \left( \frac{1}{2}x^\top A x\right) + \nabla (b^\top x)
+\]
+\\
+Let's verify the gradient of the quadratic form.
+\[
+\nabla \left( \frac{1}{2} x^\top A x\right) = \frac{1}{2} \nabla \left( \sum_{i=1}^{n} x_i \sum_{j=1}^{n} A_{ij} x_j \right)
+= \frac{1}{2} \nabla \left( \sum_{i=1}^{n} \sum_{j=1}^{n} A_{ij} x_i x_j \right)
+\]
+Now, let's look at the $k$-th component of the gradient by taking the partial derivative with respect to $x_k$
+\begin{align*}
+    \frac{\partial}{\partial x_k} \left( \frac{1}{2} \sum_{i=1}^{n} \sum_{j=1}^{n} A_{ij} x_i x_j \right)
+    &= \frac{1}{2}\sum_{i=1}^{n} \sum_{j=1}^{n} A_{ij} \frac{\partial}{\partial x_k} (x_i x_j) \\
+\end{align*}
+We consider three cases for the indices in the summation:
+\begin{enumerate}
+    \item Case 1: $i=k$ and $j \neq k$
+    \item Case 2: $i \neq k$ and $j=k$
+    \item Case 3: $i=k$ and $j=k$
+\end{enumerate}
+Then, the derivative is:
+\begin{align*}
+    \frac{1}{2}\sum_{i=1}^{n} \sum_{j=1}^{n} A_{ij} \frac{\partial}{\partial x_k} (x_i x_j)
+    &= \frac{1}{2} \left( \sum_{j \neq k} A_{kj} x_j + \sum_{i \neq k} A_{ik} x_i + \frac{\partial}{\partial x_k} (A_{kk} x_k^2) \right) \\
+    &= \frac{1}{2} \left( \sum_{j \neq k} A_{kj} x_j + \sum_{i \neq k} A_{ik} x_i + 2 A_{kk} x_k \right)\\
+    &= \frac{1}{2} \left[ \left( \sum_{j \neq k} A_{kj} x_j + A_{kk} x_k \right) + \left( \sum_{i \neq k} A_{ik} x_i + A_{kk} x_k \right) \right] \\
+    &= \frac{1}{2} \left( \sum_{j=1}^{n} A_{kj} x_j + \sum_{i=1}^{n} A_{ik} x_i \right)\\
+    &= \frac{1}{2} \left( (Ax)_k + (A^\top x)_k \right)
+\end{align*}
+\[
+\text{Therefore, }\nabla(\frac{1}{2}x^\top A x) = \frac{1}{2} \left(Ax + A^\top x \right) = Ax\quad (\text{since }A\text{ is a symmetric matrix}) 
+\]
+\\
+Next, for the linear term:
+\[
+\nabla (b^\top x) = \nabla \sum_{i=1}^{n}b_ix_i = b
+\]
+Therefore, combining both results:
+\[
+\nabla f(x) = Ax + b
+\]
+\\
+
+
+
+
+\subsection*{(b)}
+\begin{align*}
+    \nabla f(x) &= \nabla g(h(x)) \\
+    &= \begin{bmatrix}
+        \frac{\partial}{\partial x_1}g(h(x)) \\
+        \vdots \\
+        \frac{\partial}{\partial x_n}g(h(x))
+    \end{bmatrix} \\
+    &= \begin{bmatrix}
+        g'(h(x)) \frac{\partial h(x)}{\partial x_1} \\
+        \vdots \\
+        g'(h(x)) \frac{\partial h(x)}{\partial x_n}
+    \end{bmatrix} \\
+    &= g'(h(x)) \nabla h(x)
+\end{align*}
+\\
+
+\subsection*{(c)}
+\begin{align*}
+    \nabla^2f(x) &= \begin{bmatrix}
+        | & | & & |\\
+        \frac{\partial \nabla f(x)}{\partial x_1} & \frac{\partial \nabla f(x)}{\partial x_2} & \cdots & \frac{\partial \nabla f(x)}{\partial x_n} \\
+        | & | & & |
+    \end{bmatrix}\\
+    &=\begin{bmatrix}
+        | & | & & |\\
+        \frac{\partial (Ax+b)}{\partial x_1} & \frac{\partial (Ax+b)}{\partial x_2} & \cdots & \frac{\partial (Ax+b)}{\partial x_n} \\
+        | & | & & |
+    \end{bmatrix}\\
+    &= \begin{bmatrix}
+        | & | & & |\\
+        A^{(1)} & A^{(2)} & \cdots & A^{(n)} \\
+        | & | & & |
+    \end{bmatrix}\\
+    & = A
+\end{align*}
+\\
+
+
+\subsection*{(d)}
+Let $h(x)=a^\top x$
+\begin{itemize}
+    \item \textbf{Gradient}: $\nabla f(x) =\nabla g(h(x)) = g'(h(x)) \nabla h(x) = g'(a^\top x)a $
+    \item \textbf{Hessian}:
+    \begin{align*}
+        \text{Let }h(x)=a^\top x\\
+        \frac{\partial^2g(h(x))}{\partial x_i\partial x_j}&= \frac{\partial}{\partial x_j}g'(h(x))\frac{\partial h(x)}{\partial x_i}\\
+        &=g''(h(x)) \frac{\partial h(x)}{\partial x_j} \frac{\partial h(x)}{\partial x_i}\\
+        &=g''(a^\top x)a_ja_i\\
+    \end{align*}
+    Therefore, the Hessian matrix of $f(x)$ is
+    \[
+    \nabla^2f(x) = g''(a^\top x)\begin{bmatrix}
+        a_1a_1 & \dots & a_1a_n \\
+        \vdots & \ddots & \vdots \\
+        a_na_1 & \dots & a_na_n
+    \end{bmatrix} =g''(a^\top x)aa^\top
+    \]
+\end{itemize}
+
+\section*{2. Positive definite matrices}
+\subsection*{(a)}
+\[
+x^\top Ax = x^\top zz^\top x = (z^\top x)^\top (z^\top x) = \|z^\top x\|^2\ge0 \quad \therefore A\succeq0
+\]
+
+\subsection*{(b)} 
+\begin{align*}
+    \text{Null}(A) &= \{x \mid Ax=0\} = \{x \mid z^\top x=0\} \quad (\because z \neq \vec{0})\\
+    \text{Nullity}(A) &= \dim \left( \{x \mid z^\top x=0\} \right) = n-1\\
+    \text{Rank}(A) &= 1 \quad \because (\text{rank-nullity theorem})
+\end{align*}
+
+\subsection*{(c)}
+\begin{gather*}
+    x^\top B A B^\top x = (B^\top x)^\top A (B^\top x) \ge 0 \quad (\because A \succeq 0) \\
+    \therefore B A B^\top \succeq 0
+\end{gather*}
+\\
+
+\section*{3. Eigenvectors, eigenvalues, and the spectral theorem}
+\subsection*{(a)}
+\begin{align*}
+    A&=T \Lambda T^{-1}\\
+    A T &= T \Lambda\\
+    \begin{bmatrix}
+        | & | & & | \\
+        A t^{(1)} & A t^{(2)} & \cdots & A t^{(n)} \\
+        | & | & & |
+    \end{bmatrix} &=
+    \begin{bmatrix}
+    | & | & & | \\
+    \lambda_1 t^{(1)} & \lambda_2 t^{(2)} & \cdots & \lambda_n t^{(n)}\\
+    | & | & & | 
+\end{bmatrix}\\
+\therefore A t^{(i)} &=\lambda_i t^{(i)}
+\end{align*}
+
+\subsection*{(b)}
+\[
+\text{Since } U \text{ is an orthogonal matrix, }UU^\top =I
+\]
+\begin{align*}
+    A &= U \Lambda U^\top \\
+    A U &= U \Lambda \\
+    \begin{bmatrix}
+        | & | & & | \\
+        A u^{(1)} & A u^{(2)} & \cdots & A u^{(n)} \\
+        | & | & & |
+    \end{bmatrix} &= 
+    \begin{bmatrix}
+        | & | & & | \\
+        \lambda_1 u^{(1)} & \lambda_2 u^{(2)} & \cdots & \lambda_n u^{(n)}\\
+        | & | & & | 
+    \end{bmatrix}\\
+\end{align*}
+\[
+\therefore A u^{(i)} =\lambda_i u^{(i)} \implies u^{(i)} \text{is an eigenvector of }A
+\]
+
+\subsection*{(c)}
+\begin{align*}
+    x^\top A x &= x^\top U \Lambda U^\top x \\
+    &= (U^\top x)^\top \Lambda (U^\top x) \ge 0 \quad (\forall x \in \mathbb{R}^n, \text{ since } A \succeq 0) \\
+    \intertext{Let $c = U^\top x$. Since $U^\top$ is an orthogonal matrix, columns of  $U^\top$ span $\mathbb{R}^n$. Therefore, $c$ can be any vector in $\mathbb{R}^n$.} 
+    c^\top \Lambda c &= \sum_{i=1}^n c_i^2 \lambda_i \ge 0 \quad (\forall c \in \mathbb{R}^n). \\
+    \intertext{For any $j \in \{1, \dots, n\}$, choose $c$ such that $c_j=1$ and $c_k=0$ for $j \neq k$. Then,}
+    c^\top \Lambda c &= \sum_{i=1}^n c_i^2 \lambda_i = \lambda_j \ge 0. \\
+    \therefore \quad \lambda_i(A) &\ge 0 \quad \text{for each } i
+\end{align*}
+\end{document}
